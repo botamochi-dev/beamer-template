@@ -1,0 +1,55 @@
+{
+    "latex-workshop.latex.recipes": [
+        {
+            "name": "latexmk (lualatex)",
+            "tools": ["lualatexmk"]
+        }
+    ],
+    "latex-workshop.latex.tools": [
+        {
+            "name": "lualatexmk",
+            "command": "latexmk",
+            "args": [
+                "-auxdir=build",
+                "-outdir=out",
+                "-synctex=1",
+                "-interaction=nonstopmode",
+                "-file-line-error",
+                "-lualatex",
+                "%DOC%"
+            ]
+        }
+    ],
+
+    "latex-workshop.latex.outDir": "out",
+    "latex-workshop.view.pdf.viewer": "tab",
+    "latex-workshop.latex.autoBuild.run": "onFileChange",
+    "latex-workshop.latex.autoClean.run": "onBuilt",
+    "latex-workshop.latex.clean.method": "glob",
+    "latex-workshop.latex.clean.fileTypes": [
+        "../build/*.aux",
+        "../build/*.bbl",
+        "../build/*.blg",
+        "../build/*.idx",
+        "../build/*.ind",
+        "../build/*.lof",
+        "../build/*.lot",
+        "../build/*.out",
+        "../build/*.toc",
+        "../build/*.acn",
+        "../build/*.acr",
+        "../build/*.alg",
+        "../build/*.glg",
+        "../build/*.glo",
+        "../build/*.gls",
+        "../build/*.ist",
+        "../build/*.fls",
+        "../build/*.fdb_latexmk",
+        "../build/*.snm",
+        "../build/*.nav",
+        "../build/*.vrb",
+        "../build/*.xdv",
+        "*.synctex*",
+        "*.synctex.gz"
+    ]
+}

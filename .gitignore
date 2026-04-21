@@ -1,0 +1,34 @@
+# Folders to ignore
+/build/
+/docs/
+/out/
+
+# TeX/LaTeX intermediate and generated files
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.brf
+*.cb
+*.cb2
+*.fdb_latexmk
+*.fls
+*.fmt
+*.fot
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.nav
+*.out
+*.snm
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+*.toc
+*.vrb
+*.xdv
+*.run.xml
