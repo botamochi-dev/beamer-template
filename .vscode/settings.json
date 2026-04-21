@@ -1,55 +1,83 @@
 {
-    "latex-workshop.latex.recipes": [
-        {
-            "name": "latexmk (lualatex)",
-            "tools": ["lualatexmk"]
-        }
-    ],
-    "latex-workshop.latex.tools": [
-        {
-            "name": "lualatexmk",
-            "command": "latexmk",
-            "args": [
-                "-auxdir=build",
-                "-outdir=out",
-                "-synctex=1",
-                "-interaction=nonstopmode",
-                "-file-line-error",
-                "-lualatex",
-                "%DOC%"
-            ]
-        }
-    ],
+  // --- LaTeX Workshop の設定 ---
+  // サブディレクトリ管理（マルチレポート）に対応した出力先設定
+  "latex-workshop.latex.outDir": "%DIR%/out",
+  "latex-workshop.latex.rootFile.doNotPrompt": true,
 
-    "latex-workshop.latex.outDir": "out",
-    "latex-workshop.view.pdf.viewer": "tab",
-    "latex-workshop.latex.autoBuild.run": "onFileChange",
-    "latex-workshop.latex.autoClean.run": "onBuilt",
-    "latex-workshop.latex.clean.method": "glob",
-    "latex-workshop.latex.clean.fileTypes": [
-        "../build/*.aux",
-        "../build/*.bbl",
-        "../build/*.blg",
-        "../build/*.idx",
-        "../build/*.ind",
-        "../build/*.lof",
-        "../build/*.lot",
-        "../build/*.out",
-        "../build/*.toc",
-        "../build/*.acn",
-        "../build/*.acr",
-        "../build/*.alg",
-        "../build/*.glg",
-        "../build/*.glo",
-        "../build/*.gls",
-        "../build/*.ist",
-        "../build/*.fls",
-        "../build/*.fdb_latexmk",
-        "../build/*.snm",
-        "../build/*.nav",
-        "../build/*.vrb",
-        "../build/*.xdv",
-        "*.synctex*",
-        "*.synctex.gz"
-    ]
+  // 前回の「中間ファイル削除・.log保護・PDFはoutに保護」のクリーンアップ設定
+  "latex-workshop.latex.autoBuild.run": "onFileChange",
+  "latex-workshop.latex.autoClean.run": "onBuilt",
+  "latex-workshop.latex.clean.method": "glob",
+  "latex-workshop.latex.clean.fileTypes": [
+    "../build/*.aux",
+    "../build/*.bbl",
+    "../build/*.blg",
+    "../build/*.idx",
+    "../build/*.ind",
+    "../build/*.lof",
+    "../build/*.lot",
+    "../build/*.out",
+    "../build/*.toc",
+    "../build/*.acn",
+    "../build/*.acr",
+    "../build/*.alg",
+    "../build/*.glg",
+    "../build/*.glo",
+    "../build/*.gls",
+    "../build/*.ist",
+    "../build/*.fls",
+    "../build/*.fdb_latexmk",
+    "../build/*.snm",
+    "../build/*.nav",
+    "../build/*.vrb",
+    "../build/*.xdv",
+    "*.synctex*",
+    "*.synctex.gz",
+    "*.synctex(busy)"
+  ],
+
+  // SyncTeX（エディタとPDFの同期）の設定
+  "latex-workshop.view.pdf.viewer": "tab",
+  "latex-workshop.view.pdf.syncViewer.onScroll.enabled": true,
+  "latex-workshop.view.pdf.syncViewer.onBuild.enabled": true,
+  "latex-workshop.view.pdf.syncViewer.afterEditText.enabled": true,
+
+  // ビルドツール（LuaLaTeX + サブディレクトリ検索対応）
+  "latex-workshop.latex.tools": [
+    {
+      "name": "latexmk_lualatex",
+      "command": "latexmk",
+      "args": [
+        "-r",
+        "%WORKSPACE_FOLDER%/.latexmkrc",
+        "-cd",
+        "-auxdir=build",
+        "-outdir=out",
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "-lualatex",
+        "%DOC%"
+      ],
+      "env": {
+        "BSTINPUTS": ".:%DIR%:%WORKSPACE%:",
+        "BIBINPUTS": ".:%DIR%:%WORKSPACE%:"
+      }
+    }
+  ],
+
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "Build with LuaLaTeX",
+      "tools": ["latexmk_lualatex"]
+    }
+  ],
+
+  "latex-workshop.intellisense.package.enabled": true,
+  "latex-workshop.formatting.latex": "latexindent",
+
+  // エディタの書式設定
+  "[tex]": { "editor.tabSize": 2 },
+  "[latex]": { "editor.tabSize": 2 },
+  "[bibtex]": { "editor.tabSize": 2 }
 }
