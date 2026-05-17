@@ -3,6 +3,7 @@
 /docs/
 /out/
 
+
 # TeX/LaTeX intermediate and generated files
 *.aux
 *.bbl
