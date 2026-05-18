@@ -33,10 +33,16 @@
 % --- フッターのカスタマイズ ---
 \setbeamertemplate{footline}{%
   \leavevmode%
-  \begin{beamercolorbox}[wd=\paperwidth, ht=4ex, dp=2ex, right]{}%
+  \begin{beamercolorbox}[wd=\paperwidth, ht=5ex, dp=3ex, right]{}% % ボックスの高さを少し広げました
     \begin{tikzpicture}[remember picture, overlay]
-      \fill[mygray] (current page.south east) -- ++(-1.2,0) -- ++(1.2,1.2) -- cycle;
-      \node[anchor=south east, xshift=-0.5ex, yshift=0.5ex] at (current page.south east) {%
+      % --- サイズの微調整（ここの数値を大きくすると三角形が大きくなります） ---
+      \def\triSize{1.3} % 元の 1.2 から 1.8 に拡大（お好みのサイズに調整してください）
+      
+      % 三角形を描画
+      \fill[mygray] (current page.south east) -- ++(-\triSize,0) -- ++(\triSize,\triSize) -- cycle;
+      
+      % ページ番号のテキスト（位置も三角形に合わせて少し内側に調整）
+      \node[anchor=south east, xshift=-0.8ex, yshift=0.8ex] at (current page.south east) {%
         \usebeamerfont{page number in head/foot}\insertframenumber{} / \inserttotalframenumber%
       };
     \end{tikzpicture}%
@@ -57,7 +63,7 @@
 % ④ タイトルページの情報
 % ==================================================
 \title{Logic and Structure 輪読}
-\subtitle{第1.5節：完全性（Completeness）}
+\subtitle{第2.5節：完全性（Completeness）}
 \author{発表者：窪田 渚侑}
 \date{\today}
 
@@ -68,17 +74,6 @@
 
 \begin{frame}[plain]
     \titlepage
-\end{frame}
-
-\begin{frame}{本日の目標と構成}
-    \begin{itemize}
-        \item \textbf{導入：} 意味論($\models$)と構文論($\vdash$)の一致
-        \item \textbf{健全性 (Soundness)：} 補題 1.5.1
-        \item \textbf{無矛盾性 (Consistency)：} 定義 1.5.2, 補題 1.5.3--1.5.5
-        \item \textbf{極大無矛盾性：} 定義 1.5.6 とその性質
-        \item \textbf{準備：} リンデンバウムの補題 (1.5.7), モデル存在補題 (1.5.11)
-        \item \textbf{完全性 (Completeness)：} 定理 1.5.13 と決定可能性
-    \end{itemize}
 \end{frame}
 
 \section{1. イントロダクション}
@@ -96,40 +91,68 @@
 
 \section{2. 健全性 (Soundness)}
 
-\begin{frame}{補題 1.5.1：健全性定理}
-    まずは「導出可能性 $\implies$ 真理」という、比較的簡単な方向を示します。
-    
+\begin{frame}{補題 1.5.1：健全性定理（主張）}
     \begin{block}{補題 1.5.1（Soundness）}
         $\Gamma \vdash \phi \implies \Gamma \models \phi$
     \end{block}
-    
-    \textbf{直感的な意味：}
-    \begin{itemize}
-        \item 私たちの証明システムは「嘘をつかない」。
-        \item 正しい手順で証明されたものは、意味論的にも必ず正しい。
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{補題 1.5.1：健全性の証明方針（概要）}
-    \textbf{証明の概要（導出に関する帰納法）：}
-    $\Gamma \vdash \phi$ は、仮定を $\Gamma$ に持つ証明図 $D$ が存在することを意味します。この $D$ の構造に関する帰納法を用います。
-    
-    \begin{itemize}
-        \item \textbf{基底段階}：$D$ が単一の仮定 $\phi$ からなる場合。明らかに $\phi \in \Gamma$ なので、$\Gamma \models \phi$ となる。
-        \item \textbf{帰納段階}：各推論規則（$\wedge I, \to E$ など）を適用しても、前提が真であれば結論も必ず真になることを確認する。
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{補題 1.5.1：健全性の証明方針（真理保存性の代表例）}
-    \textbf{補足：主要な推論規則の真理保存性（代表例）}
-    \begin{itemize}
-        \item (仮定) もし $\phi\in\Gamma$ なら、任意の付値 $v$ に対して $[[\phi]]_v=1$ が成り立つため真理保持。
-        \item ($\wedge$ 導入) 前提である $\phi$ と $\psi$ が共に真ならば、$\phi\wedge\psi$ は真：論理演算の定義により直接成り立つ。
-        \item ($\to$ 導入) 仮定の下で $\psi$ を導けるなら、その仮定を仮定消去して $\phi\to\psi$ を導くが、任意の付値で前提が真ならば結論も真である関係が保存される。
-        \item (RAA / 背理法) $[\neg\phi]\vdots\bot$ から $\phi$ を導く場合、もし付値 $v$ が前提をすべて真にするなら $\neg\phi$ は偽でなければならず、したがって $\phi$ は真となる。
-    \end{itemize}
     \vspace{0.5em}
-    以上により、すべての推論規則について真理保存性が成立するため、帰納法により健全性が示される。\qed
+    ここでは「証明図 $D$ の構成ステップに関する数学的帰納法」を用いて、すべての推論規則について真理保存性を示します。
+\end{frame}
+
+\begin{frame}{証明（詳細） — 基底段階}
+    \textbf{基底段階：} 証明図 $D$ が単一の式 $\phi$ のみで構成されている場合。
+
+    \textbf{主張：} このとき $\Gamma \vdash \phi$ ならば $\Gamma \models \phi$ が成り立つ。
+
+    \textbf{証明：} $\phi\in\Gamma$ であり，任意の評価 $v$ が $\Gamma$ のすべての式を真にするならば， $\phi$ も真になります。よって $\Gamma\models\phi$．
+\end{frame}
+
+\begin{frame}{証明（詳細） — 帰納段階：連言 $\land$ の規則}
+    \textbf{($\land I$) かつ導入:}
+    
+    $D$ に対して $\Gamma \models \phi$，$D'$ に対して $\Gamma' \models \phi'$ が成り立つとする。
+
+    両方の仮定を含む集合 $\Gamma'':=\Gamma\cup\Gamma'$ を考えると，任意の評価 $v$ が $\Gamma''$ を真にする時，$v$ は $\Gamma$ と $\Gamma'$ も真にします。したがって $\phi$ と $\phi'$ は両方真になり，真理値の定義から $\phi\land\phi'$ も真になります。よって $\Gamma''\models\phi\land\phi'$．
+
+    \textbf{($\land E$) かつ除去:}
+    
+    $\Gamma\models\phi\land\psi$ が成り立つとする。任意の評価 $v$ が $\Gamma$ を真にするとき $\phi\land\psi$ は真であり，ゆえに $\phi$ も真になる。すなわち $\Gamma\models\phi$（同様に $\psi$ も）。
+\end{frame}
+
+\begin{frame}{証明（詳細） — 帰納段階：含意 $\to$ の規則}
+    \textbf{($\to E$) ならば除去:}
+    帰納法の仮定で $\Gamma\models\phi$ と $\Gamma\models\phi\to\psi$ が成り立つとする。
+
+    任意の評価 $v$ が $\Gamma$ を真にするなら，$\phi$ と $\phi\to\psi$ はともに真になります。真理値表より，$\phi=1$ かつ $\phi\to\psi=1$ のとき必ず $\psi=1$ でなければなりません。よって $\Gamma\models\psi$．
+
+    \textbf{($\to I$) ならば導入:}
+    
+    仮定 $[\phi]^1$ を追加した状態で、証明図 $D$ によって $\psi$ を導出できたならば、「ならばの導入（$\to I$）」を適用し、仮定 $[\phi]$ をキャンセル（取り消し）して $\phi\to\psi$ を得ます。
+    帰納法の仮定として $\Gamma\cup\{\phi\}\models\psi$ が成り立っているとする。
+
+    任意の評価 $v$ が $\Gamma$ を真にする場合を考える。もし $v(\phi)=0$ ならば真理値表により $\phi\to\psi$ は自動的に 1 になる。もし $v(\phi)=1$ ならば $v$ は $\Gamma\cup\{\phi\}$ を真にするため，帰納法の仮定から $\psi$ が 1 となる。したがっていずれの場合も $\phi\to\psi$ は 1 であり，$\Gamma\models\phi\to\psi$ が示される。
+\end{frame}
+
+\begin{frame}{証明（詳細） — 帰納段階：矛盾 $\perp$ と背理法（RAA）}
+    \textbf{($\perp$) 矛盾:}
+    帰納法の仮定で $\Gamma\models\perp$ が成り立つとする。だが $\perp$ の評価は常に 0 であるため，
+    $\Gamma$ をすべて真にする評価は存在しない。
+
+    この場合「任意の $\Gamma$ を真にする評価 $v$ に対して $\phi$ が真になる」という命題は前提が偽であるため，任意の $\phi$ について $\Gamma\models\phi$ が成立する。
+
+    \textbf{(RAA) 背理法:}
+    帰納法の仮定として $\Gamma\cup\{\neg\phi\}\models\perp$ が成り立っているとする。
+
+    任意の評価 $v$ が $\Gamma$ を真にする世界を取る。もし $v(\phi)=0$ だったならば $v(\neg\phi)=1$ であり，この評価は $\Gamma\cup\{\neg\phi\}$ を真にすることになる。だが帰納法の仮定によりそのような評価では $\perp$ が真になるはずだが，$\perp$ は決して真になれない。したがって仮定 $v(\phi)=0$ は矛盾であり，結論として $v(\phi)=1$ が導かれる。よって任意の $v$ に対して $\phi$ は真であり，$\Gamma\models\phi$ が成り立つ。
+\end{frame}
+
+\begin{frame}{まとめ：帰納法による健全性の完了}
+    以上で示した通り、
+    \begin{itemize}
+        \item 最小の証明図で真理保存が成立し（基底）、
+        \item すべての推論規則について「前提が意味論的に正しければ結論も正しい」ことを示した（帰納段階）、
+    \end{itemize}
+    よって任意の証明図 $D$ について $\Gamma\vdash\phi$ ならば $\Gamma\models\phi$ が成り立ちます。これで補題 1.5.1 の証明は完了です。\qed
 \end{frame}
 
 \begin{frame}{健全性定理の応用}
@@ -144,18 +167,16 @@
 \section{3. 無矛盾性 (Consistency)}
 
 \begin{frame}{無矛盾性とは？}
-    完全性（逆方向）の証明の礎石となるのが、ヒルベルトによって重要視された「無矛盾性」です。
+    完全性（逆方向）の証明の礎石となるのが「無矛盾性」です。
 
-    \begin{block}{定義 1.5.2：無矛盾性}
+    \begin{block}{定義 2.5.2：無矛盾性}
         命題の集合 $\Gamma$ が\textbf{「無矛盾（Consistent）」}であるとは、$\Gamma \not\vdash \bot$（$\Gamma$ から矛盾を導出できない）ことである。
     \end{block}
     
-    \vspace{0.5em}
-    言葉を変えれば：$\Gamma$ が矛盾している場合、どんな式でも導出できてしまい、その理論は数学的に価値を持たなくなってしまいます（爆発則：$\bot \vdash \phi$）。
 \end{frame}
 
-\begin{frame}{補題 1.5.3：無矛盾性の同値な言い換え}
-    \begin{block}{補題 1.5.3}
+\begin{frame}{補題 2.5.3：無矛盾性の同値な言い換え}
+    \begin{block}{補題 2.5.3}
         以下の3つの条件は同値である：
         \begin{enumerate}
             \item[(i)] $\Gamma$ は無矛盾である。
@@ -163,14 +184,13 @@
             \item[(iii)] $\Gamma \not\vdash \phi$ となる $\phi$ が少なくとも1つ存在する。
         \end{enumerate}
     \end{block}
-    
-    これらは無矛盾性が「すべてが証明できるわけではない」状態であることを示しています。
+
 \end{frame}
 
-\begin{frame}{補題 1.5.4：モデルと無矛盾性の関係}
-    数学においては、無矛盾性を示すために「モデル」を構成する手法がよくとられます。
+\begin{frame}{補題 2.5.4：モデルと無矛盾性の関係}
+    無矛盾性を示すために「モデル」を構成する手法がよくとられます。
 
-    \begin{block}{補題 1.5.4}
+    \begin{block}{補題 2.5.4}
         すべての $\psi \in \Gamma$ に対して $[[\psi]]_v = 1$ となるような付値（モデル） $v$ が存在すれば、$\Gamma$ は無矛盾である。
     \end{block}
     
@@ -178,10 +198,10 @@
     もし $\Gamma \vdash \bot$ なら、健全性により $\Gamma \models \bot$ となる。すると $\Gamma$ を満たす付値 $v$ は $[[\bot]]_v = 1$ を満たすはずだが、これは不可能である。よって $\Gamma$ は無矛盾。\qed
 \end{frame}
 
-\begin{frame}[fragile]{補題 1.5.5：否定と無矛盾性}
+\begin{frame}[fragile]{補題 2.5.5：否定と無矛盾性}
     ある集合に命題を付け加えて矛盾した場合、その命題の否定が証明されるという強力な性質です。
 
-    \begin{block}{補題 1.5.5}
+    \begin{block}{補題 2.5.5}
         \begin{enumerate}
             \item[(a)] $\Gamma \cup \{\neg \phi\}$ が矛盾している $\implies \Gamma \vdash \phi$
             \item[(b)] $\Gamma \cup \{\phi\}$ が矛盾している $\implies \Gamma \vdash \neg \phi$
@@ -206,8 +226,8 @@
 
 \section{4. 極大無矛盾集合 (Maximally Consistent)}
 
-\begin{frame}{定義 1.5.6：極大無矛盾集合}
-    \begin{block}{定義 1.5.6}
+\begin{frame}{定義 2.5.6：極大無矛盾集合}
+    \begin{block}{定義 2.5.6}
         集合 $\Gamma$ が\textbf{「極大無矛盾（Maximally Consistent）」}であるとは：
         \begin{enumerate}
             \item[(a)] $\Gamma$ は無矛盾である。
@@ -219,54 +239,43 @@
     $\Gamma$ にこれ以上1つも命題を追加できない状態です。何か1つでも追加すると、途端に矛盾してしまいます。
 \end{frame}
 
-\begin{frame}{補題 1.5.7：リンデンバウムの補題（主張とアイディア）}
-    非常に根本的な補題です。任意の無矛盾な集合は、必ず極大無矛盾集合に拡張できます。
+\begin{frame}{補題 2.5.7：リンデンバウムの補題）}
+    任意の無矛盾な集合は、必ず極大無矛盾集合に拡張できます。
 
-    \begin{block}{補題 1.5.7（リンデンバウムの補題）}
+    \begin{block}{補題 2.5.7（リンデンバウムの補題）}
         任意の無矛盾な集合 $\Gamma$ は、ある極大無矛盾集合 $\Gamma^*$ に含まれる。
     \end{block}
     
-    \textbf{証明のアイディア：}
+    \textbf{証明：}
+    あまり分からなかったので抽象的な説明だけ。
     \begin{enumerate}
         \item すべての命題を $\phi_0, \phi_1, \dots$ と一列に並べる。
-        \item 順番に $\phi_i$ を見て、「追加しても無矛盾」なら追加し、「追加すると矛盾する」なら捨てる（あるいは $\neg\phi_i$ を追加する）。
+        \item 順番に $\phi_i$ を見て、「追加しても無矛盾」なら追加し、「追加すると矛盾する」なら捨てる。
         \item これを無限回繰り返して得られる極限が $\Gamma^*$ となる。
     \end{enumerate}
 \end{frame}
 
-\begin{frame}{補題 1.5.7：リンデンバウムの補題（構成の詳細）}
-    \textbf{詳細な構成と証明：}
-    \begin{enumerate}
-        \item 命題全体を列挙 $\{\phi_n\}_{n\in\mathbb{N}}$ とする（PROP の可算性を使用）。
-        \item $\Gamma_0:=\Gamma$ と置き、帰納的に
-        \[\Gamma_{n+1}:=\begin{cases}\Gamma_n\cup\{\phi_n\}&\text{if }\Gamma_n\cup\{\phi_n\}\text{ is consistent},\\\Gamma_n&\text{otherwise}.\end{cases}\]
-        \item 最終的に $\Gamma^*:=\bigcup_{n\in\mathbb{N}}\Gamma_n$ と定義する。
-        \item まず各 $\Gamma_n$ は無矛盾である（帰納法）。よって $\Gamma^*$ の任意の有限部分集合はある $\Gamma_n$ に含まれるため無矛盾であり、したがって $\Gamma^*$ は無矛盾である。
-        \item 極大性：任意の式 $\phi$ が $\Gamma^*$ に含まれないとする。$\phi=\phi_k$ と表せるので、構成過程で $\phi_k$ は追加されなかった。よって $\Gamma_k\cup\{\phi_k\}$ は不整合であり、従って $\Gamma^*\cup\{\phi_k\}$ も不整合である。したがって $\Gamma^*$ に新たな式を追加すると矛盾が生じるため、$\Gamma^*$ は極大である。\qed
-    \end{enumerate}
-\end{frame}
-
-\begin{frame}{補題 1.5.8, 1.5.9：極大無矛盾集合の性質 (1)}
+\begin{frame}{補題 2.5.8, 2.5.9：極大無矛盾集合の性質 (1)}
     $\Gamma$ を極大無矛盾集合とします。極大であるがゆえに、完璧に閉じた世界を形成します。
 
-    \begin{block}{補題 1.5.8}
+    \begin{block}{補題 2.5.8}
         $\Gamma$ は導出に関して閉じている。すなわち：\\
         $\Gamma \vdash \phi \implies \phi \in \Gamma$
     \end{block}
 
-    \begin{block}{補題 1.5.9 (a)}
+    \begin{block}{補題 2.5.9 (a)}
         任意の命題 $\phi$ について、\\
         $\phi \in \Gamma$ または $\neg \phi \in \Gamma$ の\textbf{どちらか一方のみ}が成り立つ。
     \end{block}
 \end{frame}
 
-\begin{frame}{補題 1.5.9(b), 系 1.5.10：極大無矛盾集合の性質 (2)}
-    \begin{block}{補題 1.5.9 (b)}
+\begin{frame}{補題 2.5.9(b), 系 2.5.10：極大無矛盾集合の性質 (2)}
+    \begin{block}{補題 2.5.9 (b)}
         任意の $\phi, \psi$ について：\\
         $\phi \to \psi \in \Gamma \iff (\phi \in \Gamma \implies \psi \in \Gamma)$
     \end{block}
 
-    \begin{block}{系 1.5.10}
+    \begin{block}{系 2.5.10}
         極大無矛盾集合 $\Gamma$ について、\\
         $\phi \in \Gamma \iff \neg \phi \notin \Gamma$ \quad および \quad $\neg \phi \in \Gamma \iff \phi \notin \Gamma$
     \end{block}
@@ -275,8 +284,8 @@
 
 \section{5. モデル存在補題と完全性定理}
 
-\begin{frame}{補題 1.5.11：モデル存在補題（主張と証明の概要）}
-    \begin{block}{補題 1.5.11}
+\begin{frame}{補題 2.5.11：モデル存在補題}
+    \begin{block}{補題 2.5.11}
         $\Gamma$ が無矛盾であれば、すべての $\psi \in \Gamma$ に対して $[[\psi]]_v = 1$ となるような付値（モデル） $v$ が存在する。
     \end{block}
     
@@ -290,30 +299,16 @@
     \end{enumerate}
 \end{frame}
 
-\begin{frame}{補題 1.5.11：モデル存在補題（帰納法の詳細）}
-    \textbf{帰納法の詳細：}
-    基底：原子命題 $p$ については定義通りに成り立つ。
-
-    帰納段階：複合式に対して構成帰納法を行う。
-    \begin{itemize}
-        \item $\phi=\neg\psi$ の場合：$\neg\psi\in\Gamma^*$ ならば $\psi\notin\Gamma^*$（系1.5.10）であり、帰納法の仮定より $[[\psi]]_v=0$。よって $[[\neg\psi]]_v=1$。逆向きも同様。
-        \item $\phi=\psi\wedge\chi$ の場合：$\psi\wedge\chi\in\Gamma^*$ ならば $\psi\in\Gamma^*$ かつ $\chi\in\Gamma^*$（極大無矛盾集合の性質）であり、帰納法により $[[\psi]]_v=[[\chi]]_v=1$、従って $[[\psi\wedge\chi]]_v=1$。逆向きも同様。
-        \item $\phi=\psi\to\chi$ の場合：$\psi\to\chi\in\Gamma^*\iff(\psi\in\Gamma^*\Rightarrow\chi\in\Gamma^*)$（補題1.5.9(b)）。右辺と帰納法の仮定から評価が一致することが示される。
-        \item これらの基本的結合子について示せば、他の複合式も論理的帰納法で扱える。
-    \end{itemize}
-    よって全ての式で $\phi\in\Gamma^*\iff [[\phi]]_v=1$ が成立し、モデルの存在が証明される。
-\end{frame}
-
-\begin{frame}{系 1.5.12：反例モデルの存在}
-    \begin{block}{系 1.5.12}
-        $\Gamma \not\vdash \phi \iff$ $\Gamma$ の式をすべて真にし、かつ $\phi$ を偽にするような付値 $v$ が存在する。
+\begin{frame}{系 2.5.12：反例モデルの存在}
+    \begin{block}{系 2.5.12}
+        $\Gamma \not\vdash \phi \iff$ すべての$\psi \in \Gamma$に対して$[[\psi]]_v=1$、かつ $[[\phi]]_v=0$ となるような付値 $v$ が存在する。
     \end{block}
     
     \textbf{証明の概要 ($\implies$ 側)：}
-    $\Gamma \not\vdash \phi$ ならば、$\Gamma \cup \{\neg\phi\}$ は無矛盾である（補題 1.5.5からの帰結）。したがって補題1.5.11より $\Gamma \cup \{\neg\phi\}$ を満たす付値 $v$ が存在する。この $v$ は $\Gamma$ を真にし、$\phi$ を偽にする。\qed
+    $\Gamma \not\vdash \phi$ ならば、$\Gamma \cup \{\neg\phi\}$ は無矛盾である（補題 2.5.5からの帰結）。したがって補題2.5.11より $\Gamma \cup \{\neg\phi\}$ を満たす付値 $v$ が存在する。この $v$ は $\Gamma$ を真にし、$\phi$ を偽にする。\qed
 \end{frame}
 
-\begin{frame}{定理 1.5.13：完全性定理 (Completeness Theorem)}
+\begin{frame}{定理 2.5.13：完全性定理 (Completeness Theorem)}
     \begin{center}
         \LARGE \textbf{$\Gamma \models \phi \iff \Gamma \vdash \phi$}
     \end{center}
@@ -321,32 +316,24 @@
     \vspace{1em}
     \textbf{証明：}
     \begin{itemize}
-        \item ($\impliedby$) は健全性（補題 1.5.1）。
-        \item ($\implies$) は系 1.5.12 の対偶。すなわち、「$\Gamma$ を真にして $\phi$ を偽にする付値が存在しない（$\Gamma \models \phi$）」ならば、「$\Gamma \not\vdash \phi$ ではない」、つまり $\Gamma \vdash \phi$ となる。\qed
+        \item ($\impliedby$) は健全性（補題 2.5.1）。
+        \item ($\implies$) は系 2.5.12 の対偶。\qed
     \end{itemize}
-    \vspace{0.5em}
-    \textbf{対偶を用いた詳細な証明：}
-    仮定：$\Gamma \not\vdash \phi$. これより補題1.5.5により $\Gamma\cup\{\neg\phi\}$ は無矛盾である。
-    リンデンバウムの補題でこれを極大無矛盾集合 $\Gamma^*$ に拡張し、補題1.5.11で $\Gamma^*$ を満たす付値 $v$ を得る。
-    すると $\Gamma$ の全式は $v$ で真となるが、$\neg\phi\in\Gamma^*$ なので $[[\phi]]_v=0$。ゆえに $\Gamma\not\models\phi$。
-    したがって対偶が示され、完全性（$\Gamma\models\phi\Rightarrow\Gamma\vdash\phi$）が成り立つ。\qed
 \end{frame}
 
 \begin{frame}{完全性定理が意味するもの}
     \textbf{知的な推論と、機械的な計算の一致}
     
     \begin{itemize}
-        \item 自然演繹のような「導出（$\vdash$）」を行うには、少しの知恵とひらめきが必要です。
+        \item 自然演繹のような「導出（$\vdash$）」を行うには適度に賢くなければならない。
         \item 一方、真理値表を用いた「妥当性の確認（$\models$）」は地道ですが、機械的・自動的に行えます。
     \end{itemize}
     \vspace{1em}
     完全性定理は、この2つが完全に同等であることを保証します。理論的には、真理値表をチェックするだけで定理を機械的に発見できるということです。
 \end{frame}
 
-\section{6. 決定可能性 (Decidability)}
-
 \begin{frame}{決定可能性}
-    完全性定理により、以下のような強力な性質が直接的に得られます。
+    完全性定理により、以下のような性質が直接的に得られます。
 
     \begin{block}{決定可能性 (Decidability)}
         命題論理において、任意の式 $\phi$ が証明可能（$\vdash \phi$）かどうかを判定する「アルゴリズム（有限の手順）」が存在する。
@@ -367,6 +354,6 @@
     \end{enumerate}
 \end{frame}
 
-\section{おわり}
+\section{おわり。}
 
 \end{document}
